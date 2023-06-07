@@ -1,0 +1,79 @@
+/* Global Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Header Styles */
+  header {
+    background-color: #f4f4f4;
+    padding: 20px;
+  }
+  
+  nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  nav ul li {
+    display: inline;
+  }
+  
+  nav ul li a {
+    text-decoration: none;
+    color: #333;
+    margin: 0 10px;
+  }
+  
+  /* Hero Section Styles */
+  #hero {
+    text-align: center;
+    padding: 100px 0;
+    background-color: #f9f9f9;
+  }
+  
+  #hero h1 {
+    font-size: 36px;
+  }
+  
+  #hero p {
+    font-size: 18px;
+    margin-bottom: 30px;
+  }
+  
+  .cta-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  /* Services Section Styles */
+  #services {
+    padding: 50px;
+    text-align: center;
+    background-color: #fff;
+  }
+  
+  .service-card {
+    margin-bottom: 30px;
+  }
+  
+  .service-card img {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .service-card h3 {
+    font-size: 24px;
+  }
+  
+  .service-card p {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+    
