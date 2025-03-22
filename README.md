@@ -35,7 +35,7 @@ This repo is compatible with [OpenRouter](https://openrouter.ai/) and [OpenAI](h
 
 ## Function Max Duration
 
-By default, the function timeout is set to 300 seconds (5 minutes). If you're using Vercel's Hobby tier, you'll need to reduce this to 60 seconds. You can adjust this by changing the `MAX_DURATION` environment variable in your `.env` file:
+By default, the function timeout is set to 300 seconds (5 minutes). If you're using Vercel's Hobby tier, you'll need to reduce this to 60 seconds. You can adjust this by changing the `MAX_DURATION` environment variable in your `.env` file: 
 
 ```bash
 MAX_DURATION=60
