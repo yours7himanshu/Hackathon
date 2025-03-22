@@ -121,7 +121,7 @@ The application uses a separate model for reasoning tasks (like research analysi
 Add to your `.env` file:
 ```bash
 # Choose one of: deepseek-reasoner, deepseek-ai/DeepSeek-R1
-REASONING_MODEL=deepseek-ai/DeepSeek-R1
+REASONING_MODEL=google/gemini-2.0-pro-exp-02-05:free
 
 # Required when using models that don't support JSON schema (like deepseek-reasoner)
 BYPASS_JSON_VALIDATION=true
