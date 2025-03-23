@@ -36,7 +36,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 className="flex flex-row gap-3 items-center"
               >
                 <span className="text-lg font-semibold hover:bg-muted  rounded-md cursor-pointer">
-                  Deep Research
+                  Medical AI
                 </span>
               </Link>
               <Link
@@ -47,7 +47,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 className="flex flex-row gap-3 items-center"
               >
                 <span className="text-sm text-muted-foreground leading-3">
-                  by Firecrawl 🔥
+                  Easy Research 🐬
                 </span>
               </Link>
             </div>

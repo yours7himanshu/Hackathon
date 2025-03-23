@@ -100,11 +100,11 @@ function PureChatHeader({
 
       <Button
         variant="outline"
-        className="hidden md:flex py-1.5 px-2 h-fit md:h-[34px] order-4 md:ml-auto"
+        className="hidden md:flex py-1.5 px-2 h-fit md:h-[34px] order-4 md:ml-auto mr-16 border-blue-700"
         asChild
       >
         <Link
-          href="https://github.com/nickscamara/extract-chat"
+          href="https://github.com/yours7himanshu/Hackathon"
           target="_blank"
         >
           <span className="flex items-center gap-2">
@@ -126,7 +126,7 @@ function PureChatHeader({
         </Link>
       </Button>
 
-      <Button
+      {/* <Button
         variant="outline"
         className="hidden md:flex py-1.5 px-2 h-fit md:h-[34px] order-4 "
         asChild
@@ -149,7 +149,7 @@ function PureChatHeader({
             Get Firecrawl API Key
           </span>
         </Link>
-      </Button>
+      </Button> */}
     </header>
   );
 }
