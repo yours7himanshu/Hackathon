@@ -17,8 +17,8 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Research a topic',
-      label: 'deep dive with AI',
+      title: 'Research a medical topic',
+      label: 'Explore the Frontiers of Medical Research with AI',
       action:
         'Perform deep research on this topic and provide a comprehensive analysis: ',
     },

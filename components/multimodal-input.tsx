@@ -285,14 +285,14 @@ function PureMultimodalInput({
           <TabsList className="bg-transparent border rounded-full p-1 h-fit">
             <TabsTrigger 
               value="search" 
-              className="rounded-full px-3 py-1.5 h-fit flex items-center gap-2 data-[state=inactive]:bg-transparent data-[state=active]:bg-orange-50 hover:bg-orange-50/50 data-[state=active]:text-orange-600 border-0 data-[state=active]:shadow-none transition-colors"
+              className="rounded-full px-3 py-1.5 h-fit flex items-center gap-2 data-[state=inactive]:bg-transparent data-[state=active]:bg-blue-400 hover:bg-blue-50/50 data-[state=active]:text-white border-0 data-[state=active]:shadow-none transition-colors"
             >
               <Search size={14} />
               Search
             </TabsTrigger>
             <TabsTrigger 
               value="deep-research"
-              className="rounded-full px-3 py-1.5 h-fit flex items-center gap-2 data-[state=inactive]:bg-transparent data-[state=active]:bg-orange-50 hover:bg-orange-50/50 data-[state=active]:text-orange-600 border-0 data-[state=active]:shadow-none transition-colors"
+              className="rounded-full px-3 py-1.5 h-fit flex items-center gap-2 data-[state=inactive]:bg-transparent data-[state=active]:bg-blue-400 hover:bg-blue-50/50 data-[state=active]:text-white border-0 data-[state=active]:shadow-none transition-colors"
             >
               <Telescope size={14} />
               Deep Research
