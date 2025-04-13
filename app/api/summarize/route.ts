@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 // Initialize FireCrawl client with version specification
 const firecrawl = new FirecrawlApp({
   apiKey: process.env.FIRECRAWL_API_KEY || "fc-2aac5dfed4eb42038de75ee4c217e19e",
-  version: "v1" // Explicitly specify v1 API
+  
 });
 
 // Initialize OpenRouter (OpenAI compatible) client
