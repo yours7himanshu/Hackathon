@@ -45,8 +45,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     DEFAULT_REASONING_MODEL_NAME;
 
   return (
-    <div className="w-full h-dvh flex flex-col overflow-hidden">
-      <div className="flex-1 flex flex-col overflow-hidden max-w-full">
+
+    <div className="fixed inset-0 flex flex-col bg-background">
+      <div className="relative flex-1 overflow-hidden">
+
         <Chat
           id={chat.id}
           initialMessages={convertToUIMessages(messagesFromDb)}

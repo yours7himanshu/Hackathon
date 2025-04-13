@@ -1,9 +1,10 @@
 'use client';
 
 import type { User } from 'next-auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 
-import { PlusIcon } from '@/components/icons';
+import { PlusIcon, NewspaperIcon, ClipboardIcon, ChartIcon, SidebarLeftIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
 import { SidebarUserNav } from '@/components/sidebar-user-nav';
 import { Button } from '@/components/ui/button';
@@ -13,17 +14,20 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
   useSidebar,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
-import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
-  const { setOpenMobile } = useSidebar();
+  const pathname = usePathname();
+  const { setOpenMobile, toggleSidebar } = useSidebar();
 
   return (
-    <Sidebar className="group-data-[side=left]:border-r-0">
+    <Sidebar className="group-data-[side=left]:border-r-0 bg-gradient-to-b from-background to-background/95">
       <SidebarHeader>
         <SidebarMenu>
           <div className="flex flex-row justify-between items-center">
@@ -35,7 +39,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 }}
                 className="flex flex-row gap-3 items-center"
               >
-                <span className="text-lg font-semibold hover:bg-muted  rounded-md cursor-pointer">
+                <span className="text-xl font-bold hover:bg-muted/50 px-2 py-1 rounded-md cursor-pointer transition-all duration-200 bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">
                   Medical AI
                 </span>
               </Link>
@@ -46,7 +50,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 }}
                 className="flex flex-row gap-3 items-center"
               >
-                <span className="text-sm text-muted-foreground leading-3">
+                <span className="text-sm text-muted-foreground leading-3 ml-2 hover:text-primary transition-colors duration-200">
                   Easy Research 🐬
                 </span>
               </Link>
@@ -56,7 +60,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <Button
                   variant="ghost"
                   type="button"
-                  className="p-2 h-fit"
+                  className="p-2 h-fit rounded-full hover:bg-primary/10 transition-all duration-200"
                   onClick={() => {
                     setOpenMobile(false);
                     router.push('/');
@@ -70,11 +74,110 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </Tooltip>
           </div>
         </SidebarMenu>
+
+        {/* Primary Navigation */}
+        <SidebarMenu className="mt-6">
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={pathname === '/'}
+              tooltip="Chat"
+              className={`transition-all duration-200 rounded-lg px-3 py-2.5 ${pathname === '/' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
+            >
+              <Link href="/" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
+                <PlusIcon size={18} className={pathname === '/' ? 'text-primary' : ''} />
+                <span>Chat</span>
+                {pathname === '/' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem className="mt-1">
+            <div className="flex items-center gap-2">
+              <SidebarMenuButton 
+                asChild 
+                isActive={pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize'}
+                tooltip="News"
+                className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
+              >
+                <Link href="/news" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
+                  <NewspaperIcon size={18} className={(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') ? 'text-primary' : ''} />
+                  <span>News</span>
+                  {(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
+                </Link>
+              </SidebarMenuButton>
+              {(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') && (
+                <Button
+                  variant="ghost"
+                  onClick={toggleSidebar}
+                  className="p-1.5 h-fit hover:bg-primary/10 transition-all duration-200"
+                >
+                  <SidebarLeftIcon size={16} />
+                </Button>
+              )}
+            </div>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem className="mt-1">
+            <div className="flex items-center gap-2">
+              <SidebarMenuButton 
+                asChild 
+                isActive={pathname === '/news/summarize'}
+                tooltip="Summary"
+                className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${pathname === '/news/summarize' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
+              >
+                <Link href="/news/summarize" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
+                  <ClipboardIcon size={18} className={pathname === '/news/summarize' ? 'text-primary' : ''} />
+                  <span>Summary</span>
+                  {pathname === '/news/summarize' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
+                </Link>
+              </SidebarMenuButton>
+              {pathname === '/news/summarize' && (
+                <Button
+                  variant="ghost"
+                  onClick={toggleSidebar}
+                  className="p-1.5 h-fit hover:bg-primary/10 transition-all duration-200"
+                >
+                  <SidebarLeftIcon size={16} />
+                </Button>
+              )}
+            </div>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem className="mt-1">
+            <div className="flex items-center gap-2">
+              <SidebarMenuButton 
+                asChild 
+                isActive={pathname === '/analyse-report'}
+                tooltip="Analysis Report"
+                className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${pathname === '/analyse-report' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
+              >
+                <Link href="/analyse-report" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
+                  <ChartIcon size={18} className={pathname === '/analyse-report' ? 'text-primary' : ''} />
+                  <span>Analysis Report</span>
+                  {pathname === '/analyse-report' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
+                </Link>
+              </SidebarMenuButton>
+              {pathname === '/analyse-report' && (
+                <Button
+                  variant="ghost"
+                  onClick={toggleSidebar}
+                  className="p-1.5 h-fit hover:bg-primary/10 transition-all duration-200"
+                >
+                  <SidebarLeftIcon size={16} />
+                </Button>
+              )}
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        
+        <SidebarSeparator className="my-3 opacity-50" />
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarHistory user={user} />
       </SidebarContent>
-      <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+      <SidebarFooter className="border-t border-border/40 pt-2">{user && <SidebarUserNav user={user} />}</SidebarFooter>
     </Sidebar>
   );
 }

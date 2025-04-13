@@ -21,9 +21,9 @@ export const models: Array<Model> = [
   //   description: 'Affordable for complex, multi-step tasks',
   // },
   {
-    id: 'google/gemini-2.0-pro-exp-02-05:free',
-    label: 'google/gemini-2.0-pro-exp-02-05:free',
-    apiIdentifier: 'google/gemini-2.0-pro-exp-02-05:free',
+    id: 'google/gemini-2.5-pro-exp-03-25:free',
+    label: 'google/gemini-2.5-pro-exp-03-25:free',
+    apiIdentifier: 'google/gemini-2.5-pro-exp-03-25:free',
     description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   }
 ] as const;
@@ -48,14 +48,14 @@ export const reasoningModels: Array<Model> = [
   //   description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   // },
   {
-    id: 'google/gemini-2.0-pro-exp-02-05:free',
-    label: 'google/gemini-2.0-pro-exp-02-05:free',
-    apiIdentifier: 'google/gemini-2.0-pro-exp-02-05:free',
+    id: 'google/gemini-2.5-pro-exp-03-25:free',
+    label: 'google/gemini-2.5-pro-exp-03-25:free',
+    apiIdentifier: 'google/gemini-2.5-pro-exp-03-25:free',
     description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   }
 ] as const;
 
-export const DEFAULT_MODEL_NAME: string = 'google/gemini-2.0-pro-exp-02-05:free';
-export const DEFAULT_REASONING_MODEL_NAME: string = 'google/gemini-2.0-pro-exp-02-05:free';
+export const DEFAULT_MODEL_NAME: string = 'google/gemini-2.5-pro-exp-03-25:free';
+export const DEFAULT_REASONING_MODEL_NAME: string = 'google/gemini-2.5-pro-exp-03-25:free';
 
 
