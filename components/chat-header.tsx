@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { VisibilityType, VisibilitySelector } from './visibility-selector';
 import { useDeepResearch } from '@/lib/deep-research-context';
 import { models, reasoningModels } from '@/lib/ai/models';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 function PureChatHeader({
   chatId,
@@ -125,6 +126,8 @@ function PureChatHeader({
           </span>
         </Link>
       </Button>
+
+      <ThemeToggle />
 
       {/* <Button
         variant="outline"

@@ -148,7 +148,7 @@ This app supports specialized reasoning models for structured research and analy
 ### 🔧 Configuration Example
 
 ```bash
-REASONING_MODEL=google/gemini-2.0-pro-exp-02-05:free
+REASONING_MODEL=google/gemini-2.5-pro-exp-03-25:free
 BYPASS_JSON_VALIDATION=true
 ```
 

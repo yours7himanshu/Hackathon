@@ -45,16 +45,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     DEFAULT_REASONING_MODEL_NAME;
 
   return (
-    <>
-      <Chat
-        id={chat.id}
-        initialMessages={convertToUIMessages(messagesFromDb)}
-        selectedModelId={selectedModelId}
-        selectedReasoningModelId={reasoningModelId}
-        selectedVisibilityType={chat.visibility}
-        isReadonly={session?.user?.id !== chat.userId}
-      />
-      <DataStreamHandler id={id} />
-    </>
+    <div className="fixed inset-0 flex flex-col bg-background">
+      <div className="relative flex-1 overflow-hidden">
+        <Chat
+          id={chat.id}
+          initialMessages={convertToUIMessages(messagesFromDb)}
+          selectedModelId={selectedModelId}
+          selectedReasoningModelId={reasoningModelId}
+          selectedVisibilityType={chat.visibility}
+          isReadonly={session?.user?.id !== chat.userId}
+        />
+        <DataStreamHandler id={id} />
+      </div>
+    </div>
   );
 }
