@@ -20,6 +20,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { string } from 'zod';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -85,7 +86,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               className={`transition-all duration-200 rounded-lg px-3 py-2.5 ${pathname === '/' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
             >
               <Link href="/" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
-                <PlusIcon size={18} className={pathname === '/' ? 'text-primary' : ''} />
+                <PlusIcon size={18}  />
                 <span>Chat</span>
                 {pathname === '/' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
               </Link>
@@ -101,7 +102,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
               >
                 <Link href="/news" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
-                  <NewspaperIcon size={18} className={(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') ? 'text-primary' : ''} />
+                  <NewspaperIcon size={18}  />
                   <span>News</span>
                   {(pathname === '/news' || pathname.startsWith('/news/') && pathname !== '/news/summarize') && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
                 </Link>
@@ -127,7 +128,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${pathname === '/news/summarize' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
               >
                 <Link href="/news/summarize" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
-                  <ClipboardIcon size={18} className={pathname === '/news/summarize' ? 'text-primary' : ''} />
+                  <ClipboardIcon size={18}  />
                   <span>Summary</span>
                   {pathname === '/news/summarize' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
                 </Link>
@@ -153,7 +154,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 className={`transition-all duration-200 rounded-lg px-3 py-2.5 flex-grow ${pathname === '/analyse-report' ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50'}`}
               >
                 <Link href="/analyse-report" onClick={() => setOpenMobile(false)} className="flex items-center gap-3">
-                  <ChartIcon size={18} className={pathname === '/analyse-report' ? 'text-primary' : ''} />
+                  <ChartIcon size={18}  />
                   <span>Analysis Report</span>
                   {pathname === '/analyse-report' && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
                 </Link>

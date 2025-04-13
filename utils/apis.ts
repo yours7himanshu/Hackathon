@@ -29,7 +29,7 @@ export async function scrapeNewsContent(url: string) {
       throw new Error(`Failed to scrape: ${result.error}`);
     }
     
-    return result.data;
+    return result;
   } catch (error) {
     console.error('Error scraping content:', error);
     throw error;

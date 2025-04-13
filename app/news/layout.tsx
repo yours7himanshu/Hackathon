@@ -18,7 +18,7 @@ export default async function Layout({
     console.warn('Failed to get session:', error);
   }
   
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const isCollapsed = cookieStore.get('sidebar:state')?.value !== 'true';
 
   return (

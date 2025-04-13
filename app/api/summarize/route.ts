@@ -5,13 +5,12 @@ import OpenAI from 'openai';
 // Initialize FireCrawl client with version specification
 const firecrawl = new FirecrawlApp({
   apiKey: process.env.FIRECRAWL_API_KEY || "fc-2aac5dfed4eb42038de75ee4c217e19e",
-  
 });
 
 // Initialize OpenRouter (OpenAI compatible) client
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY || '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',
+  apiKey: process.env.OPENROUTER_API_KEY || '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',
   defaultHeaders: {
     'HTTP-Referer': 'https://extract.chat',
     'X-Title': 'Medical News Summarizer',
@@ -84,7 +83,8 @@ async function directFetchContent(url: string) {
     };
   } catch (error) {
     console.error('Error in direct fetch fallback:', error);
-    throw new Error(`Direct fetch fallback also failed: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Direct fetch fallback also failed: ${errorMessage}`);
   }
 }
 
@@ -138,28 +138,38 @@ async function scrapeNewsContent(url: string) {
       throw new Error(`Failed to scrape: ${result.error}`);
     }
 
-    // Log the entire result structure to better understand the response
+    // Create a properly structured response object
+    const responseData = {
+      markdown: result.markdown || '',
+      html: result.html || '',
+      metadata: result.metadata || { 
+        title: '', 
+        description: '', 
+        sourceURL: normalizedUrl 
+      }
+    };
+
+    // Log the response structure
     console.log('FireCrawl response structure:', 
       JSON.stringify({
         success: result.success,
-        dataExists: !!result.data,
-        markdownExists: result.data?.markdown ? true : false,
-        htmlExists: result.data?.html ? true : false,
-        metadata: result.data?.metadata
+        markdownExists: !!responseData.markdown,
+        htmlExists: !!responseData.html,
+        metadata: responseData.metadata
       })
     );
 
-    // If FireCrawl returns success but no data or content, try direct fetch as fallback
-    if (!result.data || (!result.data.markdown && !result.data.html)) {
+    // If FireCrawl returns success but no content, try direct fetch as fallback
+    if (!responseData.markdown && !responseData.html) {
       console.log('FireCrawl returned empty result, falling back to direct fetch');
       return await directFetchContent(normalizedUrl);
     }
 
     // If markdown is not available but HTML is, convert HTML to text
-    if (!result.data.markdown && result.data.html) {
+    if (!responseData.markdown && responseData.html) {
       console.log('Using HTML content instead of markdown');
       // Create a simple text representation from HTML
-      const htmlContent = result.data.html;
+      const htmlContent = responseData.html;
       // Extract text content from HTML (simple approach)
       const textContent = htmlContent
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')  // Remove scripts
@@ -169,32 +179,39 @@ async function scrapeNewsContent(url: string) {
         .trim();
       
       // Add the extracted text as markdown
-      result.data.markdown = textContent;
+      responseData.markdown = textContent;
       
       // If still no content, try one more approach
-      if (!result.data.markdown || result.data.markdown.length < 200) {
+      if (!responseData.markdown || responseData.markdown.length < 200) {
         console.log('HTML content extraction produced insufficient content, trying with title and metadata');
         // Create content from metadata if available
-        if (result.data.metadata && result.data.metadata.title) {
-          let metadataContent = `# ${result.data.metadata.title}\n\n`;
+        if (responseData.metadata && responseData.metadata.title) {
+          let metadataContent = `# ${responseData.metadata.title}\n\n`;
           
-          if (result.data.metadata.description) {
-            metadataContent += `${result.data.metadata.description}\n\n`;
+          if (responseData.metadata.description) {
+            metadataContent += `${responseData.metadata.description}\n\n`;
           }
           
           metadataContent += `Source: ${normalizedUrl}`;
-          result.data.markdown = metadataContent;
+          responseData.markdown = metadataContent;
         }
       }
     }
 
     // Final check for markdown content
-    if (!result.data.markdown || result.data.markdown.trim().length < 100) {
+    if (!responseData.markdown || responseData.markdown.trim().length < 100) {
       console.log('Insufficient content extracted, falling back to direct fetch');
       return await directFetchContent(normalizedUrl);
     }
     
-    return result;
+    // Return a consistently structured result
+    return {
+      success: true,
+      data: {
+        markdown: responseData.markdown,
+        metadata: responseData.metadata
+      }
+    };
   } catch (error: any) {
     // If FireCrawl fails, try direct fetch as fallback
     console.error('FireCrawl error, attempting direct fetch fallback:', error);
@@ -223,8 +240,10 @@ async function scrapeNewsContent(url: string) {
  */
 async function summarizeContent(content: string, maxLength: number = 400) {
   try {
+    console.log('Calling OpenRouter API for summarization...');
+    
     const completion = await openai.chat.completions.create({
-      model: 'google/gemini-2.5-pro-exp-03-25:free',
+      model: 'anthropic/claude-3-haiku:beta', // Changed model to more reliable one
       messages: [
         {
           role: 'system',
@@ -234,17 +253,42 @@ async function summarizeContent(content: string, maxLength: number = 400) {
         },
         {
           role: 'user',
-          content: content,
+          content: content.substring(0, 10000), // Limiting content length to avoid token issues
         },
       ],
       max_tokens: 500,
       temperature: 0.3,
     });
     
+    // Log the response structure to diagnose issues
+    console.log('OpenRouter API response structure:', 
+      JSON.stringify({
+        hasChoices: Array.isArray(completion.choices),
+        choicesLength: Array.isArray(completion.choices) ? completion.choices.length : 0,
+        firstChoice: completion.choices && completion.choices.length > 0 ? 'exists' : 'missing'
+      })
+    );
+    
+    // Check if the response has the expected structure
+    if (!completion.choices || completion.choices.length === 0) {
+      console.error('Unexpected API response structure - missing choices array:', completion);
+      return "Unable to generate summary. The article may be too complex or contain formatting issues.";
+    }
+    
+    if (!completion.choices[0].message || !completion.choices[0].message.content) {
+      console.error('Unexpected API response structure - missing message content:', completion.choices[0]);
+      return "Summary generation incomplete. Please try again with a different article.";
+    }
+    
     return completion.choices[0].message.content;
   } catch (error) {
     console.error('Error summarizing content:', error);
-    throw error;
+    // Provide a more informative error message
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+    }
+    // Return a fallback message instead of throwing
+    return "Unable to generate summary due to an API error. Please try again later.";
   }
 }
 
