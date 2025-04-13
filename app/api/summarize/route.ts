@@ -224,7 +224,7 @@ async function scrapeNewsContent(url: string) {
 async function summarizeContent(content: string, maxLength: number = 400) {
   try {
     const completion = await openai.chat.completions.create({
-      model: 'openai/gpt-4o',
+      model: 'google/gemini-2.5-pro-exp-03-25:free',
       messages: [
         {
           role: 'system',
