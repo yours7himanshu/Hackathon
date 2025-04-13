@@ -1,85 +1,78 @@
-import '@/app/globals.css';
-import { Inter } from 'next/font/google';
+import type { Metadata } from 'next';
+import { Toaster } from 'sonner';
+
+import { ThemeProvider } from '@/components/theme-provider';
+import { Analytics } from '@vercel/analytics/react';
 import { DeepResearchProvider } from '@/lib/deep-research-context';
 
-// Remove Analytics import if not installed
-let Analytics;
-try {
-  Analytics = require('@vercel/analytics/react').Analytics;
-} catch (error) {
-  Analytics = () => null;
-}
+import './globals.css';
 
-// Conditionally import auth-related modules to prevent errors if auth isn't fully set up
-let getServerSession: Function;
-let authOptions: any;
-
-try {
-  const authModule = require('@/auth');
-  const nextAuthModule = require('next-auth/next');
-  
-  authOptions = authModule.authOptions;
-  getServerSession = nextAuthModule.getServerSession;
-} catch (error) {
-  // If auth modules fail to load, provide fallbacks
-  console.warn('Auth module not available or correctly configured');
-  getServerSession = async () => null;
-  authOptions = {};
-}
-
-// Use a simpler approach for Providers to avoid hydration issues
-const ClientProvidersImport = () => {
-  // Using dynamic import with next/dynamic would be better
-  // but keeping it simple for now
-  const { Providers } = require('@/components/providers');
-  return Providers;
+export const metadata: Metadata = {
+  metadataBase: new URL('https://extract.chat'),
+  title: 'Medical Research AI 🐬',
+  description:
+    'Extract Chat allows you to extract information from any website with the help of an AI chatbot.',
 };
 
-const inter = Inter({ subsets: ['latin'] });
+export const viewport = {
+  maximumScale: 1, // Disable auto-zoom on mobile Safari
+};
+
+const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
+const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
+const THEME_COLOR_SCRIPT = `\
+(function() {
+  var html = document.documentElement;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute('name', 'theme-color');
+    document.head.appendChild(meta);
+  }
+  function updateThemeColor() {
+    var isDark = html.classList.contains('dark');
+    meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
+  }
+  var observer = new MutationObserver(updateThemeColor);
+  observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+  updateThemeColor();
+})();`;
 
 export default async function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  // Try to get session, but don't break if auth isn't set up
-  let session = null;
-  try {
-    session = await getServerSession(authOptions);
-  } catch (error) {
-    console.warn('Failed to get session:', error);
-  }
-  
-  // Simplify the provider structure
+}>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      // `next-themes` injects an extra classname to the body element to avoid
+      // visual flicker before hydration. Hence the `suppressHydrationWarning`
+      // prop is necessary to avoid the React hydration mismatch warning.
+      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
+      suppressHydrationWarning
+    >
       <head>
-        <meta name="theme-color" content="transparent" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: THEME_COLOR_SCRIPT,
+          }}
+        />
       </head>
-      <body className={inter.className}>
-        {/* ClientProviders will only run on client-side */}
-        <ClientProviders>
+      <body className="antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
           <DeepResearchProvider>
+            <Toaster position="top-center" />
             {children}
           </DeepResearchProvider>
-        </ClientProviders>
-        {typeof Analytics === 'function' && <Analytics />}
+        </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
-}
-
-// Client component to handle theme provider
-function ClientProviders({ children }: { children: React.ReactNode }) {
-  'use client';
-  
-  // Attempt to load the Providers component
-  try {
-    const ProvidersComponent = ClientProvidersImport();
-    return <ProvidersComponent>{children}</ProvidersComponent>;
-  } catch (error) {
-    // Fallback to simple wrapper if providers can't be loaded
-    console.warn('Failed to load Providers component:', error);
-    return <>{children}</>;
-  }
 }

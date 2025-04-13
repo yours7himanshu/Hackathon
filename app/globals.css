@@ -177,6 +177,38 @@
     @apply bg-blue-200 hover:bg-blue-300 dark:hover:bg-blue-400/50 dark:text-blue-50 dark:bg-blue-500/40;
 }
 
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  html, body {
+    /* Prevent overscroll bounce effect on mobile */
+    overscroll-behavior: none;
+  }
+  
+  /* Larger touch targets for mobile */
+  button, 
+  a[role="button"],
+  .clickable {
+    @apply min-h-10 min-w-10;
+  }
+  
+  /* Improve tap highlight for mobile */
+  .tap-highlight {
+    -webkit-tap-highlight-color: rgba(var(--primary), 0.2);
+  }
+}
+
+/* System improvements for sidebar on mobile */
+.sidebar-open {
+  @apply overflow-hidden lg:overflow-auto;
+}
+
+/* Fix for iOS safari 100vh issue */
+@supports (-webkit-touch-callout: none) {
+  .h-screen, .h-full.fixed {
+    height: -webkit-fill-available;
+  }
+}
+
 /* Button styling for Search and Deep Research buttons */
 /* .search-button, 
 .deep-research-button,
