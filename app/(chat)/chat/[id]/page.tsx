@@ -45,8 +45,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     DEFAULT_REASONING_MODEL_NAME;
 
   return (
+
     <div className="fixed inset-0 flex flex-col bg-background">
       <div className="relative flex-1 overflow-hidden">
+
         <Chat
           id={chat.id}
           initialMessages={convertToUIMessages(messagesFromDb)}
@@ -54,6 +56,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           selectedReasoningModelId={reasoningModelId}
           selectedVisibilityType={chat.visibility}
           isReadonly={session?.user?.id !== chat.userId}
+
         />
         <DataStreamHandler id={id} />
       </div>
