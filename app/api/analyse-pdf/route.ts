@@ -1,28 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import pdf from 'pdf-parse'; // Changed import for pdf-parse
+import Groq from 'groq-sdk'
 
-// Ensure pdf-parse types are available or handle potential type issues
-// You might need to install @types/pdf-parse
 
-// --- Environment Variables ---
-// Ensure these are set in your .env.local file
 const siteUrl = process.env.YOUR_SITE_URL || 'http://localhost:3000'; // Default if not set
-const siteName = process.env.YOUR_SITE_NAME || 'My Analyse App'; // Default if not set
+const siteName = process.env.YOUR_SITE_NAME || 'My Medical AI'; // Default if not set
 
 export async function POST(req: NextRequest) {
   console.log('Received request for /api/analyse-pdf');
-  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+  const groqApiKey = process.env.GROQ_API_KEY;
 
-  if (!openRouterApiKey) {
+  if (!groqApiKey) {
     console.error('API Error: OPENROUTER_API_KEY is not set.');
     return NextResponse.json({ error: 'Server configuration error: API key missing.' }, { status: 500 });
   }
 
   // Initialize client inside the handler
-  const openai = new OpenAI({
-    baseURL: 'https://openrouter.ai/api/v1',
-    apiKey: openRouterApiKey,
+  const groq = new Groq({
+   
+    apiKey: groqApiKey,
     defaultHeaders: {
       'HTTP-Referer': siteUrl,
       'X-Title': siteName,
@@ -55,36 +52,36 @@ if (!pdfText || pdfText.trim().length === 0) {
     return NextResponse.json({ error: 'Could not extract text from PDF or PDF is empty.' }, { status: 400 });
 }
 
-const prompt = `Please analyze the following text extracted from a PDF document and provide a concise summary:\n\n"${pdfText.substring(0, 4000)}..."`;
-console.log('Attempting to call OpenRouter API...');
+const prompt = `Please analyze the following text extracted from a PDF document and provide a concise summary of about 4000 words:\n\n"${pdfText.substring(0, 4000)}..."`;
+console.log('Attempting to call Groq API...');
 
-const completion = await openai.chat.completions.create({
-    model: 'google/gemini-2.5-pro-exp-03-25:free', // Or choose another model supported by OpenRouter
+const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile', 
     messages: [
     {
         role: 'user',
         content: prompt,
     },
     ],
-    // max_tokens: 500,
+    max_tokens: 4000,
 });
 
-// --- Added Logging --- 
-console.log('OpenRouter API call successful.');
-console.log('Raw OpenRouter completion object:', JSON.stringify(completion, null, 2)); // Log the raw response
-// --- End Added Logging ---
+
+console.log('Groq API call successful.');
+console.log('Raw Groq completion object:', JSON.stringify(completion, null, 2)); // Log the raw response
+
 
 const analysis = completion.choices[0]?.message?.content;
 
 if (!analysis) {
-    console.error('OpenRouter response error: No analysis content found in the response.');
+    console.error('Groq response error: No analysis content found in the response.');
     throw new Error('Failed to get analysis content from OpenRouter.');
 }
 
-// --- Added Logging ---
+
 console.log('Extracted analysis:', analysis.trim());
 console.log('Sending successful response back to client.');
-// --- End Added Logging ---
+
 
 return NextResponse.json({ analysis: analysis.trim() });
 }

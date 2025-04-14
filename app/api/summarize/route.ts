@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import FirecrawlApp from '@mendable/firecrawl-js';
-import OpenAI from 'openai';
+import Groq from 'groq-sdk'
+
+
+// initialising groq
+const groq = new Groq({
+  apiKey:process.env.GROQ_API_KEY,
+  defaultHeaders: {
+    'HTTP-Referer': 'https://extract.chat',
+    'X-Title': 'Medical News Summarizer',
+  },
+});
 
 // Initialize FireCrawl client with version specification
 const firecrawl = new FirecrawlApp({
   apiKey: process.env.FIRECRAWL_API_KEY || "fc-2aac5dfed4eb42038de75ee4c217e19e",
 });
 
-// Initialize OpenRouter (OpenAI compatible) client
-const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY || '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',
-  defaultHeaders: {
-    'HTTP-Referer': 'https://extract.chat',
-    'X-Title': 'Medical News Summarizer',
-  },
-});
+
 
 /**
  * Ensure the URL includes the protocol (http:// or https://)
@@ -240,10 +242,10 @@ async function scrapeNewsContent(url: string) {
  */
 async function summarizeContent(content: string, maxLength: number = 400) {
   try {
-    console.log('Calling OpenRouter API for summarization...');
+    console.log('Calling Groq API for summarization...');
     
-    const completion = await openai.chat.completions.create({
-      model: 'anthropic/claude-3-haiku:beta', // Changed model to more reliable one
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile', 
       messages: [
         {
           role: 'system',
@@ -261,7 +263,7 @@ async function summarizeContent(content: string, maxLength: number = 400) {
     });
     
     // Log the response structure to diagnose issues
-    console.log('OpenRouter API response structure:', 
+    console.log('Groq API response structure:', 
       JSON.stringify({
         hasChoices: Array.isArray(completion.choices),
         choicesLength: Array.isArray(completion.choices) ? completion.choices.length : 0,
