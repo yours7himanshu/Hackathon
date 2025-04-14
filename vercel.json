@@ -1,9 +1,7 @@
 {
     "functions": {
       "app/api/**/route.ts": {
-        "includeFiles": [
-          "test/**"
-        ]
+        "includeFiles": "test/**"
       }
     }
   }
