@@ -2,7 +2,7 @@
     "functions": {
       "app/api/**/route.ts": {
         "includeFiles": [
-          "test/data/05-versions-space.pdf"
+          "test/**"
         ]
       }
     }
