@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import pdf from 'pdf-parse'; // Changed import for pdf-parse
 import Groq from 'groq-sdk'
 
