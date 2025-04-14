@@ -1,8 +1,5 @@
 {
-    "functions": {
-      "pages/api/**/*.ts": {
-        "includeFiles": "test/data/05-versions-space.pdf"
-      },
+    "functions": { 
       "app/api/**/*.ts": {
         "includeFiles": "test/data/05-versions-space.pdf"
       }
