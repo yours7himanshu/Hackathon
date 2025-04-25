@@ -1,34 +1,16 @@
-import {
-  type Message,
-  convertToCoreMessages,
-  createDataStreamResponse,
-  generateObject,
-  generateText,
-  streamObject,
-  streamText,
-} from 'ai';
 import { z } from 'zod';
-
 import { auth, signIn } from '@/app/(auth)/auth';
-import { customModel } from '@/lib/ai';
+import { customModel, completeChatGroq } from '@/lib/ai';
 import { models, reasoningModels } from '@/lib/ai/models';
 import { rateLimiter } from '@/lib/rate-limit';
-import {
-  codePrompt,
-  systemPrompt,
-  updateDocumentPrompt,
-} from '@/lib/ai/prompts';
+import { systemPrompt } from '@/lib/ai/prompts';
 import {
   deleteChatById,
   getChatById,
-  getDocumentById,
   getUser,
   saveChat,
-  saveDocument,
   saveMessages,
-  saveSuggestions,
 } from '@/lib/db/queries';
-import type { Suggestion } from '@/lib/db/schema';
 import {
   generateUUID,
   getMostRecentUserMessage,
@@ -38,22 +20,203 @@ import {
 import { generateTitleFromUserMessage } from '../../actions';
 import FirecrawlApp from '@mendable/firecrawl-js';
 
+// Message type definition that was previously imported from 'ai'
+interface Message {
+  id?: string;
+  content: string;
+  role: 'system' | 'user' | 'assistant' | 'function' | 'data' | 'tool';
+  createdAt?: Date;
+  name?: string;
+}
+
+// Helper function to convert messages to core format (previously from 'ai')
+function convertToCoreMessages(messages: Message[]) {
+  return messages.map(message => ({
+    content: message.content,
+    role: message.role,
+    name: message.name
+  }));
+}
+
+// Custom implementation of createDataStreamResponse (previously from 'ai')
+function createDataStreamResponse({ execute }) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const dataStream = {
+        writeData: (data) => {
+          const chunk = encoder.encode(`data: ${JSON.stringify(data)}\n\n`);
+          controller.enqueue(chunk);
+        },
+        writeMessageAnnotation: (data) => {
+          const chunk = encoder.encode(`data: ${JSON.stringify({ type: 'message-annotation', ...data })}\n\n`);
+          controller.enqueue(chunk);
+        },
+        close: () => {
+          const chunk = encoder.encode('data: [DONE]\n\n');
+          controller.enqueue(chunk);
+          controller.close();
+        }
+      };
+
+      await execute(dataStream);
+      dataStream.close();
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+    },
+  });
+}
+
+// Custom implementation for streaming chat completions from Groq
+async function streamText(options) {
+  const { model, system, messages, tools, onFinish } = options;
+  
+  // If this is our direct Groq implementation, handle it differently
+  if (model.isDirectGroq) {
+    // Format messages with system prompt if provided
+    const formattedMessages = system 
+      ? [{ role: 'system', content: system }, ...messages]
+      : [...messages];
+    
+    // Create a response object to collect the streamed messages
+    const responseObject = {
+      messages: [...messages]
+    };
+    
+    return {
+      mergeIntoDataStream: async (dataStream) => {
+        try {
+          // Start stream with a pending message
+          dataStream.writeData({
+            type: 'assistant-message', 
+            content: '',
+            role: 'assistant',
+            id: generateUUID()
+          });
+          
+          // Get the Groq completion stream
+          const stream = await completeChatGroq({
+            messages: formattedMessages,
+            model: model.modelId,
+            stream: true
+          });
+          
+          let fullContent = '';
+          
+          // Process the stream chunks
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+              fullContent += content;
+              
+              // Write chunk to the stream
+              dataStream.writeData({
+                type: 'text', 
+                content
+              });
+            }
+          }
+          
+          // Add the complete response to the response object
+          responseObject.messages.push({
+            role: 'assistant',
+            content: fullContent
+          });
+          
+          // Call onFinish callback if provided
+          if (onFinish) {
+            await onFinish({ response: responseObject });
+          }
+        } catch (error) {
+          console.error('Error streaming from Groq:', error);
+          dataStream.writeData({
+            type: 'error',
+            error: error.message || 'An error occurred while streaming from Groq'
+          });
+        }
+      }
+    };
+  }
+  
+  // Fallback for other models (should be removed when all AI SDKs are removed)
+  throw new Error('Only Groq models are currently supported');
+}
+
+// Function for generating text non-streaming (used for title generation and analysis)
+export async function generateText({ model, prompt, system }) {
+  if (model.isDirectGroq) {
+    const messages = system 
+      ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
+      : [{ role: 'user', content: prompt }];
+      
+    const response = await completeChatGroq({
+      messages,
+      model: model.modelId,
+      stream: false
+    });
+    
+    return { text: response.choices[0]?.message?.content || '' };
+  }
+  
+  throw new Error('Only Groq models are currently supported');
+}
+
+// Function to extract data from URLs
+async function extractFromUrls(urls: string[]): Promise<Array<{text: string; source: string}>> {
+  // Filter out any empty or undefined URLs
+  const validUrls = urls.filter(url => !!url);
+  
+  if (validUrls.length === 0) {
+    return [];
+  }
+  
+  try {
+    const findings: Array<{text: string; source: string}> = [];
+    
+    // Process each URL and extract content
+    for (const url of validUrls) {
+      try {
+        const result = await app.scrapeUrl(url);
+        
+        if (result.success && result.markdown) {
+          // Limit the text size to avoid token issues
+          const truncatedText = result.markdown.substring(0, 4000);
+          findings.push({
+            text: truncatedText,
+            source: url
+          });
+        }
+      } catch (err) {
+        console.error(`Error extracting from URL ${url}:`, err);
+        // Continue with other URLs even if one fails
+      }
+    }
+    
+    return findings;
+  } catch (error) {
+    console.error('Error in extractFromUrls:', error);
+    return [];
+  }
+}
+
 type AllowedTools =
   | 'deepResearch'
   | 'search'
   | 'extract'
   | 'scrape';
 
-
 const firecrawlTools: AllowedTools[] = ['search', 'extract', 'scrape'];
-
 const allTools: AllowedTools[] = [...firecrawlTools, 'deepResearch'];
 
 const app = new FirecrawlApp({
   apiKey: process.env.FIRECRAWL_API_KEY || '',
 });
-
-// const reasoningModel = customModel(process.env.REASONING_MODEL || 'o1-mini', true);
 
 export async function POST(request: Request) {
   const maxDuration = process.env.MAX_DURATION
@@ -174,18 +337,18 @@ export async function POST(request: Request) {
   });
 
   return createDataStreamResponse({
-    execute: (dataStream) => {
+    execute: async (dataStream) => {
       dataStream.writeData({
         type: 'user-message-id',
         content: userMessageId,
       });
 
-      const result = streamText({
-        // Router model
+      // Here we use our custom streamText implementation
+      const result = await streamText({
+        // Use our direct Groq model
         model: customModel(model.apiIdentifier, false),
         system: systemPrompt,
         messages: coreMessages,
-        maxSteps: 10,
         experimental_activeTools: experimental_deepResearch ? allTools : firecrawlTools,
         tools: {
           search: {
@@ -241,7 +404,6 @@ export async function POST(request: Request) {
             parameters: z.object({
               urls: z.array(z.string()).describe(
                 'Array of URLs to extract data from',
-                // , include a /* at the end of each URL if you think you need to search for other pages insides that URL to extract the full data from',
               ),
               prompt: z
                 .string()
@@ -388,7 +550,7 @@ export async function POST(request: Request) {
                   const timeRemainingMinutes =
                     Math.round((timeRemaining / 1000 / 60) * 10) / 10;
 
-                  // Reasoning model
+                  // Reasoning model - using our direct implementation
                   const result = await generateText({
                     model: customModel(reasoningModel.apiIdentifier, true),
                     prompt: `You are a research agent analyzing findings about: ${topic}
@@ -426,49 +588,6 @@ export async function POST(request: Request) {
                   console.error('Analysis error:', error);
                   return null;
                 }
-              };
-
-              const extractFromUrls = async (urls: string[]) => {
-                const extractPromises = urls.map(async (url) => {
-                  try {
-                    addActivity({
-                      type: 'extract',
-                      status: 'pending',
-                      message: `Analyzing ${new URL(url).hostname}`,
-                      timestamp: new Date().toISOString(),
-                      depth: researchState.currentDepth,
-                    });
-
-                    const result = await app.extract([url], {
-                      prompt: `Extract key information about ${topic}. Focus on facts, data, and expert opinions. Analysis should be full of details and very comprehensive.`,
-                    });
-
-                    if (result.success) {
-                      addActivity({
-                        type: 'extract',
-                        status: 'complete',
-                        message: `Extracted from ${new URL(url).hostname}`,
-                        timestamp: new Date().toISOString(),
-                        depth: researchState.currentDepth,
-                      });
-
-                      if (Array.isArray(result.data)) {
-                        return result.data.map((item) => ({
-                          text: item.data,
-                          source: url,
-                        }));
-                      }
-                      return [{ text: result.data, source: url }];
-                    }
-                    return [];
-                  } catch {
-                    // console.warn(`Extraction failed for ${url}:`);
-                    return [];
-                  }
-                });
-
-                const results = await Promise.all(extractPromises);
-                return results.flat();
               };
 
               try {
@@ -698,18 +817,16 @@ export async function POST(request: Request) {
               console.error('Failed to save chat');
             }
           }
-        },
-        experimental_telemetry: {
-          isEnabled: true,
-          functionId: 'stream-text',
-        },
+        }
       });
 
-      result.mergeIntoDataStream(dataStream);
+      // Merge the result into the data stream
+      await result.mergeIntoDataStream(dataStream);
     },
   });
 }
 
+// The DELETE implementation remains unchanged
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');

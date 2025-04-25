@@ -1,16 +1,24 @@
 'use server';
 
-import { type CoreUserMessage, generateText } from 'ai';
 import { cookies } from 'next/headers';
 import { models, reasoningModels } from '@/lib/ai/models';
 
 import { customModel } from '@/lib/ai';
+// Import the generateText function we created in route.ts
+import { generateText } from '@/app/(chat)/api/chat/route';
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
   updateChatVisiblityById,
 } from '@/lib/db/queries';
 import { VisibilityType } from '@/components/visibility-selector';
+
+// Type definition for CoreUserMessage since we're not importing from AI SDK anymore
+interface CoreUserMessage {
+  content: string;
+  role: 'user';
+  name?: string;
+}
 
 export async function saveModelId(model: string) {
   const cookieStore = await cookies();
@@ -28,7 +36,7 @@ export async function generateTitleFromUserMessage({
   message: CoreUserMessage;
 }) {
   const { text: title } = await generateText({
-    model: customModel('microsoft/mai-ds-r1:free'),
+    model: customModel('llama-3.3-70b-versatile'),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 80 characters long

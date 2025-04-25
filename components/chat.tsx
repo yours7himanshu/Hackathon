@@ -1,7 +1,5 @@
 'use client';
 
-import type { Attachment, Message } from 'ai';
-import { useChat } from 'ai/react';
 import { useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
@@ -15,6 +13,7 @@ import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import { VisibilityType } from './visibility-selector';
 import { useBlockSelector } from '@/hooks/use-block';
+import useGroqChat, { Message, Attachment } from '@/hooks/use-groq-chat';
 
 export function Chat({
   id,
@@ -45,9 +44,14 @@ export function Chat({
     isLoading,
     stop,
     reload,
-  } = useChat({
+  } = useGroqChat({
     id,
-    body: { id, modelId: selectedModelId, reasoningModelId: selectedReasoningModelId, experimental_deepResearch: searchMode === 'deep-research' },
+    body: { 
+      id, 
+      modelId: selectedModelId, 
+      reasoningModelId: selectedReasoningModelId, 
+      experimental_deepResearch: searchMode === 'deep-research' 
+    },
     initialMessages,
     experimental_throttle: 100,
     onFinish: () => {

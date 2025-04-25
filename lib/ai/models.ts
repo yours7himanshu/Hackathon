@@ -21,10 +21,10 @@ export const models: Array<Model> = [
   //   description: 'Affordable for complex, multi-step tasks',
   // },
   {
-    id: 'microsoft/mai-ds-r1:free',
-    label: 'microsoft/mai-ds-r1:free',
-    apiIdentifier: 'microsoft/mai-ds-r1:free',
-    description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
+    id: 'llama-3.3-70b-versatile',
+    label: 'Llama 3.3 70B (Groq)',
+    apiIdentifier: 'llama-3.3-70b-versatile',
+    description: 'High-performance Llama model optimized for fast inference on Groq',
   }
 ] as const;
 
@@ -48,14 +48,14 @@ export const reasoningModels: Array<Model> = [
   //   description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   // },
   {
-    id: 'microsoft/mai-ds-r1:free',
-    label: 'microsoft/mai-ds-r1:free',
-    apiIdentifier: 'microsoft/mai-ds-r1:free',
-    description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
+    id: 'llama-3.3-70b-reasoning',
+    label: 'Llama 3.3 70B (Reasoning)',
+    apiIdentifier: 'llama-3.3-70b-versatile',
+    description: 'Advanced reasoning capabilities with optimized performance via Groq',
   }
 ] as const;
 
-export const DEFAULT_MODEL_NAME: string = 'microsoft/mai-ds-r1:free';
-export const DEFAULT_REASONING_MODEL_NAME: string = 'microsoft/mai-ds-r1:free';
+export const DEFAULT_MODEL_NAME: string = 'llama-3.3-70b-versatile';
+export const DEFAULT_REASONING_MODEL_NAME: string = 'llama-3.3-70b-reasoning';
 
 
