@@ -10,12 +10,12 @@ type ReasoningModel = typeof VALID_REASONING_MODELS[number];
 // Valid reasoning models that can be used for research analysis and structured outputs
 const VALID_REASONING_MODELS = [
   
-  'google/gemini-2.5-pro-exp-03-25:free',
+  'meta-llama/llama-4-scout:free',
   
 ] as const;
 
 // Models that support JSON structured output
-const JSON_SUPPORTED_MODELS = ['google/gemini-2.5-pro-exp-03-25:free'] as const;
+const JSON_SUPPORTED_MODELS = ['meta-llama/llama-4-scout:free'] as const;
 
 // Helper to check if model supports JSON
 export const supportsJsonOutput = (modelId: string) =>
@@ -63,7 +63,7 @@ export const customModel = (apiIdentifier: string, forReasoning: boolean = false
   }
 
   // Select provider based on model
-  const model = modelId === 'google/gemini-2.5-pro-exp-03-25:free'
+  const model = modelId === 'meta-llama/llama-4-scout:free'
     ? togetherai(modelId)
     : openai(modelId);
 

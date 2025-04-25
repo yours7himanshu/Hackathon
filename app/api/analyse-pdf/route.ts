@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import pdf from 'pdf-parse'; // Temporarily comment out to isolate the error
+import pdf from 'pdf-parse';
 import Groq from 'groq-sdk';
+import { setupPdfParseEnvironment } from '@/lib/pdf-parse-fix';
+
+// Initialize pdf-parse environment fix at module load time
+setupPdfParseEnvironment();
 
 const siteUrl = process.env.YOUR_SITE_URL || 'http://localhost:3000'; // Default if not set
 const siteName = process.env.YOUR_SITE_NAME || 'My Medical AI'; // Default if not set
@@ -40,19 +44,25 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`Received file: ${file.name}, size: ${file.size}, type: ${file.type}`);
-    console.log('Attempting to parse PDF...'); // Comment out usage
+    console.log('Attempting to parse PDF...');
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const pdfData = await pdf(fileBuffer); // Comment out usage
-    const pdfText = pdfData.text; // Comment out usage
-    // const pdfText = "PDF parsing temporarily disabled for testing."; // Placeholder
-    console.log(`PDF parsed successfully. Text length: ${pdfText?.length || 0}`); // Comment out usage
+    
+    // Try-catch specifically for the pdf-parse operation
+    let pdfText;
+    try {
+      const pdfData = await pdf(fileBuffer);
+      pdfText = pdfData.text;
+      console.log(`PDF parsed successfully. Text length: ${pdfText?.length || 0}`);
+    } catch (pdfError) {
+      console.error('Error in pdf-parse:', pdfError);
+      return NextResponse.json({ error: 'Could not parse the PDF file', details: pdfError instanceof Error ? pdfError.message : 'Unknown pdf parsing error' }, { status: 400 });
+    }
 
     if (!pdfText || pdfText.trim().length === 0) {
       console.log('PDF parsing error: No text extracted or empty.');
       return NextResponse.json({ error: 'Could not extract text from PDF or PDF is empty.' }, { status: 400 });
     }
 
-    // Modify the prompt temporarily since pdfText is now a placeholder string
     const prompt = `Please analyze the following text extracted from a PDF document and provide a concise summary of about 4000 words:\n\n"${pdfText.substring(0, 4000)}..."`;
     
     console.log('Attempting to call Groq API...');
