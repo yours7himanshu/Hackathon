@@ -31,8 +31,20 @@ interface UseGroqChatOptions {
   experimental_throttle?: number;
 }
 
+// Define interfaces for the event types we expect
+interface DoneEvent {
+  type: 'done';
+}
+
+interface TextEvent {
+  type: 'text';
+  content: string;
+}
+
+type EventSourceMessage = DoneEvent | TextEvent | Record<string, unknown>;
+
 // Function to parse SSE responses
-const parseEventSourceMessage = (data: string) => {
+const parseEventSourceMessage = (data: string): EventSourceMessage => {
   const result = data
     .split('\n')
     .filter(Boolean)
@@ -44,7 +56,7 @@ const parseEventSourceMessage = (data: string) => {
       return { name, value };
     });
 
-  let event = {};
+  let event: Record<string, unknown> = {};
   for (const { name, value } of result) {
     if (name === 'data') {
       if (value === '[DONE]') {
@@ -226,7 +238,7 @@ export default function useGroqChat({
       if (onFinish) await onFinish(finalMessage);
       
       return finalMessage;
-    } catch (err) {
+    } catch (err:any) {
       // Handle any errors during the fetch or processing
       if (err.name === 'AbortError') {
         // Request was aborted, not an error to report
