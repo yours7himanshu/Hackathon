@@ -39,7 +39,13 @@ function convertToCoreMessages(messages: Message[]) {
 }
 
 // Custom implementation of createDataStreamResponse (previously from 'ai')
-function createDataStreamResponse({ execute }) {
+function createDataStreamResponse({ execute }: { 
+  execute: (dataStream: { 
+    writeData: (data: any) => void;
+    writeMessageAnnotation: (data: any) => void;
+    close: () => void;
+  }) => Promise<void> 
+}) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
