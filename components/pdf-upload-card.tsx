@@ -235,7 +235,7 @@ export default function PdfUploadCard() {
           </div>
 
           <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
-            Powered by <span className="font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Gemini Flash 1.5</span> via OpenRouter
+            Powered by <span className="font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Groq</span>
           </p>
         </CardContent>
       </Card>

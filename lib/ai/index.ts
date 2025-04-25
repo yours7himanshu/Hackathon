@@ -10,12 +10,12 @@ type ReasoningModel = typeof VALID_REASONING_MODELS[number];
 // Valid reasoning models that can be used for research analysis and structured outputs
 const VALID_REASONING_MODELS = [
   
-  'meta-llama/llama-4-scout:free',
+  'microsoft/mai-ds-r1:free',
   
 ] as const;
 
 // Models that support JSON structured output
-const JSON_SUPPORTED_MODELS = ['meta-llama/llama-4-scout:free'] as const;
+const JSON_SUPPORTED_MODELS = ['microsoft/mai-ds-r1:free'] as const;
 
 // Helper to check if model supports JSON
 export const supportsJsonOutput = (modelId: string) =>
@@ -35,7 +35,7 @@ function getReasoningModel(modelId: string) {
   const configuredModel = REASONING_MODEL;
 
   if (!VALID_REASONING_MODELS.includes(configuredModel as ReasoningModel)) {
-    const fallback = 'o1-mini';
+    const fallback = 'microsoft/mai-ds-r1:free';
     console.warn(`Invalid REASONING_MODEL "${configuredModel}", falling back to ${fallback}`);
     return fallback;
   }
@@ -63,7 +63,7 @@ export const customModel = (apiIdentifier: string, forReasoning: boolean = false
   }
 
   // Select provider based on model
-  const model = modelId === 'meta-llama/llama-4-scout:free'
+  const model = modelId === 'microsoft/mai-ds-r1:free'
     ? togetherai(modelId)
     : openai(modelId);
 

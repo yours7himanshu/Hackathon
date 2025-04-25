@@ -21,9 +21,9 @@ export const models: Array<Model> = [
   //   description: 'Affordable for complex, multi-step tasks',
   // },
   {
-    id: 'meta-llama/llama-4-scout:free',
-    label: 'meta-llama/llama-4-scout:free',
-    apiIdentifier: 'meta-llama/llama-4-scout:free',
+    id: 'microsoft/mai-ds-r1:free',
+    label: 'microsoft/mai-ds-r1:free',
+    apiIdentifier: 'microsoft/mai-ds-r1:free',
     description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   }
 ] as const;
@@ -48,14 +48,14 @@ export const reasoningModels: Array<Model> = [
   //   description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   // },
   {
-    id: 'meta-llama/llama-4-scout:free',
-    label: 'meta-llama/llama-4-scout:free',
-    apiIdentifier: 'meta-llama/llama-4-scout:free',
+    id: 'microsoft/mai-ds-r1:free',
+    label: 'microsoft/mai-ds-r1:free',
+    apiIdentifier: 'microsoft/mai-ds-r1:free',
     description: 'For deep reasoning and complex, multi-step tasks, cheaper.',
   }
 ] as const;
 
-export const DEFAULT_MODEL_NAME: string = 'meta-llama/llama-4-scout:free';
-export const DEFAULT_REASONING_MODEL_NAME: string = 'meta-llama/llama-4-scout:free';
+export const DEFAULT_MODEL_NAME: string = 'microsoft/mai-ds-r1:free';
+export const DEFAULT_REASONING_MODEL_NAME: string = 'microsoft/mai-ds-r1:free';
 
 
