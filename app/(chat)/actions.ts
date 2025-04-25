@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 import { models, reasoningModels } from '@/lib/ai/models';
 
 import { customModel } from '@/lib/ai';
-// Import the generateText function we created in route.ts
-import { generateText } from '@/app/(chat)/api/chat/route';
+// Import the generateText function from our utility file
+import { generateText } from '@/lib/ai/generate-text';
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,

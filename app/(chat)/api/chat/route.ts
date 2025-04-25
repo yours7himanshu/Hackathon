@@ -148,25 +148,6 @@ async function streamText(options) {
   throw new Error('Only Groq models are currently supported');
 }
 
-// Function for generating text non-streaming (used for title generation and analysis)
-export async function generateText({ model, prompt, system }) {
-  if (model.isDirectGroq) {
-    const messages = system 
-      ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
-      : [{ role: 'user', content: prompt }];
-      
-    const response = await completeChatGroq({
-      messages,
-      model: model.modelId,
-      stream: false
-    });
-    
-    return { text: response.choices[0]?.message?.content || '' };
-  }
-  
-  throw new Error('Only Groq models are currently supported');
-}
-
 // Function to extract data from URLs
 async function extractFromUrls(urls: string[]): Promise<Array<{text: string; source: string}>> {
   // Filter out any empty or undefined URLs
@@ -502,6 +483,26 @@ export async function POST(request: Request) {
                 },
               });
 
+              // Internal function to generate text (with a unique name to avoid conflicts)
+              async function generateTextInternal({ model, prompt, system, maxTokens = 1024 }) {
+                if (model.isDirectGroq) {
+                  const messages = system 
+                    ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
+                    : [{ role: 'user', content: prompt }];
+                    
+                  const response = await completeChatGroq({
+                    messages,
+                    model: model.modelId,
+                    stream: false,
+                    max_tokens: maxTokens
+                  });
+                  
+                  return { text: response.choices[0]?.message?.content || '' };
+                }
+                
+                throw new Error('Only Groq models are currently supported');
+              }
+
               const addSource = (source: {
                 url: string;
                 title: string;
@@ -551,7 +552,7 @@ export async function POST(request: Request) {
                     Math.round((timeRemaining / 1000 / 60) * 10) / 10;
 
                   // Reasoning model - using our direct implementation
-                  const result = await generateText({
+                  const result = await generateTextInternal({
                     model: customModel(reasoningModel.apiIdentifier, true),
                     prompt: `You are a research agent analyzing findings about: ${topic}
                             You have ${timeRemainingMinutes} minutes remaining to complete the research but you don't need to use all of it.
@@ -727,7 +728,7 @@ export async function POST(request: Request) {
                   depth: researchState.currentDepth,
                 });
 
-                const finalAnalysis = await generateText({
+                const finalAnalysis = await generateTextInternal({
                   model: customModel(reasoningModel.apiIdentifier, true),
                   maxTokens: 16000,
                   prompt: `Create a comprehensive long analysis of ${topic} based on these findings:
