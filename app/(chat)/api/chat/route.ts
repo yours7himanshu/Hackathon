@@ -16,11 +16,22 @@ import {
   getMostRecentUserMessage,
   sanitizeResponseMessages,
 } from '@/lib/utils';
+import type {
+  CoreMessage,
+} from 'ai';
 
+// Import the specific CoreUserMessage type from the actions file to ensure compatibility
 import { generateTitleFromUserMessage } from '../../actions';
 import FirecrawlApp from '@mendable/firecrawl-js';
 
-// Message type definition that was previously imported from 'ai'
+// Import or define the same CoreUserMessage interface as in actions.ts
+interface CoreUserMessage {
+  content: string;
+  role: 'user';
+  name?: string;
+}
+
+// Message type definition for our local use
 interface Message {
   id?: string;
   content: string;
@@ -29,13 +40,26 @@ interface Message {
   name?: string;
 }
 
-// Helper function to convert messages to core format (previously from 'ai')
-function convertToCoreMessages(messages: Message[]): Array<{ content: string; role: string; name?: string }> {
+// Helper function to convert messages to core format
+function convertToCoreMessages(messages: Message[]): CoreMessage[] {
   return messages.map(message => ({
     content: message.content,
     role: message.role,
     name: message.name
-  }));
+  } as CoreMessage));
+}
+
+// Helper function to adapt a CoreMessage to our local CoreUserMessage format
+function adaptToLocalUserMessage(message: CoreMessage): CoreUserMessage {
+  if (message.role !== 'user') {
+    throw new Error('Message is not a user message');
+  }
+  
+  return {
+    content: typeof message.content === 'string' ? message.content : JSON.stringify(message.content),
+    role: 'user',
+    
+  };
 }
 
 interface DataStream {
@@ -323,7 +347,10 @@ export async function POST(request: Request) {
   const chat = await getChatById({ id });
 
   if (!chat) {
-    const title = await generateTitleFromUserMessage({ message: userMessage });
+    // Cast userMessage to CoreUserMessage to ensure type compatibility
+    const title = await generateTitleFromUserMessage({ 
+      message: adaptToLocalUserMessage(userMessage) 
+    });
     await saveChat({ id, userId: session.user.id, title });
   }
 
