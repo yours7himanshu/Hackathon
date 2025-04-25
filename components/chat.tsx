@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
+import type { Message as UIMessage, Attachment as UIAttachment, CreateMessage, ChatRequestOptions } from 'ai';
 
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
@@ -13,8 +14,7 @@ import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import { VisibilityType } from './visibility-selector';
 import { useBlockSelector } from '@/hooks/use-block';
-import useGroqChat, { Message as GroqMessage, Attachment } from '@/hooks/use-groq-chat';
-import type { Message as UIMessage } from '@ai-sdk/ui-utils';
+import useGroqChat, { Message as GroqMessage, Attachment as GroqAttachment } from '@/hooks/use-groq-chat';
 
 // Type adapter function to ensure compatibility between message types
 function adaptMessages(messages: GroqMessage[]): UIMessage[] {
@@ -25,6 +25,50 @@ function adaptMessages(messages: GroqMessage[]): UIMessage[] {
     createdAt: msg.createdAt,
     name: msg.name
   })) as UIMessage[];
+}
+
+// Adapter for attachments
+function adaptAttachments(attachments: GroqAttachment[]): UIAttachment[] {
+  return attachments.map(att => ({
+    url: att.url || '',
+    name: att.name || '',
+    type: att.type
+  })) as UIAttachment[];
+}
+
+// Adapter for the append function to match expected return type
+async function adaptAppend(
+  append: (message: GroqMessage | { content: string }) => Promise<GroqMessage | null>,
+  message: UIMessage | CreateMessage,
+  options?: ChatRequestOptions
+): Promise<string | null | undefined> {
+  const result = await append(message as GroqMessage);
+  return result?.id || null;
+}
+
+// Adapter for the handleSubmit function
+function adaptHandleSubmit(
+  handleSubmit: (e?: React.FormEvent<HTMLFormElement>) => Promise<void>
+): (
+  event?: { preventDefault?: () => void },
+  options?: ChatRequestOptions
+) => void {
+  return (event, options) => {
+    if (event?.preventDefault) {
+      event.preventDefault();
+    }
+    handleSubmit(event as any);
+  };
+}
+
+// Adapter for the reload function
+function adaptReload(
+  reload: () => Promise<void>
+): (options?: ChatRequestOptions) => Promise<string | null | undefined> {
+  return async (options) => {
+    await reload();
+    return null;
+  };
 }
 
 export function Chat({
@@ -94,7 +138,7 @@ export function Chat({
     fetcher,
   );
 
-  const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+  const [attachments, setAttachments] = useState<Array<GroqAttachment>>([]);
   const isBlockVisible = useBlockSelector((state) => state.isVisible);
 
   const handleSearchModeChange = (mode: 'search' | 'deep-research') => {
@@ -103,6 +147,8 @@ export function Chat({
 
   // Use the adapter to ensure type compatibility
   const compatibleMessages = adaptMessages(messages);
+  const adaptedReload = adaptReload(reload);
+  const adaptedHandleSubmit = adaptHandleSubmit(handleSubmit);
 
   return (
     <>
@@ -120,8 +166,8 @@ export function Chat({
           isLoading={isLoading}
           votes={votes}
           messages={compatibleMessages}
-          setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
-          reload={reload}
+          setMessages={(newMessages) => setMessages(newMessages as any)}
+          reload={adaptedReload}
           isReadonly={isReadonly}
           isBlockVisible={isBlockVisible}
         />
@@ -132,14 +178,14 @@ export function Chat({
               chatId={id}
               input={input}
               setInput={setInput}
-              handleSubmit={handleSubmit}
+              handleSubmit={adaptedHandleSubmit}
               isLoading={isLoading}
               stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
+              attachments={adaptAttachments(attachments)}
+              setAttachments={setAttachments as any}
               messages={compatibleMessages}
-              setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
-              append={append}
+              setMessages={setMessages as any}
+              append={(message, options) => adaptAppend(append, message, options)}
               searchMode={searchMode}
               setSearchMode={handleSearchModeChange}
             />
@@ -151,15 +197,15 @@ export function Chat({
         chatId={id}
         input={input}
         setInput={setInput}
-        handleSubmit={handleSubmit}
+        handleSubmit={adaptedHandleSubmit}
         isLoading={isLoading}
         stop={stop}
-        attachments={attachments}
-        setAttachments={setAttachments}
-        append={append}
+        attachments={adaptAttachments(attachments)}
+        setAttachments={setAttachments as any}
+        append={(message, options) => adaptAppend(append, message, options)}
         messages={compatibleMessages}
-        setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
-        reload={reload}
+        setMessages={setMessages as any}
+        reload={adaptedReload}
         votes={votes}
         isReadonly={isReadonly}
         searchMode={searchMode}
