@@ -13,7 +13,19 @@ import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import { VisibilityType } from './visibility-selector';
 import { useBlockSelector } from '@/hooks/use-block';
-import useGroqChat, { Message, Attachment } from '@/hooks/use-groq-chat';
+import useGroqChat, { Message as GroqMessage, Attachment } from '@/hooks/use-groq-chat';
+import type { Message as UIMessage } from '@ai-sdk/ui-utils';
+
+// Type adapter function to ensure compatibility between message types
+function adaptMessages(messages: GroqMessage[]): UIMessage[] {
+  return messages.map(msg => ({
+    id: msg.id || '',
+    content: msg.content,
+    role: msg.role,
+    createdAt: msg.createdAt,
+    name: msg.name
+  })) as UIMessage[];
+}
 
 export function Chat({
   id,
@@ -25,7 +37,7 @@ export function Chat({
 
 }: {
   id: string;
-  initialMessages: Array<Message>;
+  initialMessages: Array<GroqMessage>;
   selectedModelId: string;
   selectedReasoningModelId: string;
   selectedVisibilityType: VisibilityType;
@@ -89,6 +101,9 @@ export function Chat({
     setSearchMode(mode);
   };
 
+  // Use the adapter to ensure type compatibility
+  const compatibleMessages = adaptMessages(messages);
+
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
@@ -104,8 +119,8 @@ export function Chat({
           chatId={id}
           isLoading={isLoading}
           votes={votes}
-          messages={messages}
-          setMessages={setMessages}
+          messages={compatibleMessages}
+          setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
           reload={reload}
           isReadonly={isReadonly}
           isBlockVisible={isBlockVisible}
@@ -122,8 +137,8 @@ export function Chat({
               stop={stop}
               attachments={attachments}
               setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
+              messages={compatibleMessages}
+              setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
               append={append}
               searchMode={searchMode}
               setSearchMode={handleSearchModeChange}
@@ -142,8 +157,8 @@ export function Chat({
         attachments={attachments}
         setAttachments={setAttachments}
         append={append}
-        messages={messages}
-        setMessages={setMessages}
+        messages={compatibleMessages}
+        setMessages={(newMessages) => setMessages(newMessages as GroqMessage[])}
         reload={reload}
         votes={votes}
         isReadonly={isReadonly}
