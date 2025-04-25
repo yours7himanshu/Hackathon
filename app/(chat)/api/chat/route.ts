@@ -30,7 +30,7 @@ interface Message {
 }
 
 // Helper function to convert messages to core format (previously from 'ai')
-function convertToCoreMessages(messages: Message[]) {
+function convertToCoreMessages(messages: Message[]): Array<{ content: string; role: string; name?: string }> {
   return messages.map(message => ({
     content: message.content,
     role: message.role,
@@ -38,23 +38,25 @@ function convertToCoreMessages(messages: Message[]) {
   }));
 }
 
+interface DataStream {
+  writeData: (data: { type: string; content: any; [key: string]: any }) => void;
+  writeMessageAnnotation: (data: any) => void;
+  close: () => void;
+}
+
 // Custom implementation of createDataStreamResponse (previously from 'ai')
 function createDataStreamResponse({ execute }: { 
-  execute: (dataStream: { 
-    writeData: (data: any) => void;
-    writeMessageAnnotation: (data: any) => void;
-    close: () => void;
-  }) => Promise<void> 
+  execute: (dataStream: DataStream) => Promise<void> 
 }) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      const dataStream = {
-        writeData: (data) => {
+      const dataStream: DataStream = {
+        writeData: (data: { type: string; content: any; [key: string]: any }) => {
           const chunk = encoder.encode(`data: ${JSON.stringify(data)}\n\n`);
           controller.enqueue(chunk);
         },
-        writeMessageAnnotation: (data) => {
+        writeMessageAnnotation: (data: any) => {
           const chunk = encoder.encode(`data: ${JSON.stringify({ type: 'message-annotation', ...data })}\n\n`);
           controller.enqueue(chunk);
         },
@@ -79,8 +81,17 @@ function createDataStreamResponse({ execute }: {
   });
 }
 
+interface StreamTextOptions {
+  model: any;
+  system?: string;
+  messages: any[];
+  tools?: any;
+  onFinish?: (data: { response: any }) => Promise<void>;
+  experimental_activeTools?: AllowedTools[];
+}
+
 // Custom implementation for streaming chat completions from Groq
-async function streamText(options) {
+async function streamText(options: StreamTextOptions) {
   const { model, system, messages, tools, onFinish } = options;
   
   // If this is our direct Groq implementation, handle it differently
@@ -96,7 +107,7 @@ async function streamText(options) {
     };
     
     return {
-      mergeIntoDataStream: async (dataStream) => {
+      mergeIntoDataStream: async (dataStream: DataStream) => {
         try {
           // Start stream with a pending message
           dataStream.writeData({
@@ -139,10 +150,11 @@ async function streamText(options) {
           if (onFinish) {
             await onFinish({ response: responseObject });
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error streaming from Groq:', error);
           dataStream.writeData({
             type: 'error',
+            content: error.message || 'An error occurred while streaming from Groq',
             error: error.message || 'An error occurred while streaming from Groq'
           });
         }
@@ -155,7 +167,7 @@ async function streamText(options) {
 }
 
 // Function to extract data from URLs
-async function extractFromUrls(urls: string[]): Promise<Array<{text: string; source: string}>> {
+async function extractFromUrls(urls: string[]): Promise<Array<{ text: string; source: string }>> {
   // Filter out any empty or undefined URLs
   const validUrls = urls.filter(url => !!url);
   
@@ -164,7 +176,7 @@ async function extractFromUrls(urls: string[]): Promise<Array<{text: string; sou
   }
   
   try {
-    const findings: Array<{text: string; source: string}> = [];
+    const findings: Array<{ text: string; source: string }> = [];
     
     // Process each URL and extract content
     for (const url of validUrls) {
@@ -324,7 +336,7 @@ export async function POST(request: Request) {
   });
 
   return createDataStreamResponse({
-    execute: async (dataStream) => {
+    execute: async (dataStream: DataStream) => {
       dataStream.writeData({
         type: 'user-message-id',
         content: userMessageId,
@@ -350,7 +362,7 @@ export async function POST(request: Request) {
                 .optional()
                 .describe('Maximum number of results to return (default 10)'),
             }),
-            execute: async ({ query, maxResults = 5 }) => {
+            execute: async ({ query, maxResults = 5 }: { query: string; maxResults?: number }) => {
               try {
                 const searchResult = await app.search(query);
 
@@ -396,7 +408,7 @@ export async function POST(request: Request) {
                 .string()
                 .describe('Description of what data to extract'),
             }),
-            execute: async ({ urls, prompt }) => {
+            execute: async ({ urls, prompt }: { urls: string[]; prompt: string }) => {
               try {
                 const scrapeResult = await app.extract(urls, {
                   prompt,
@@ -464,7 +476,7 @@ export async function POST(request: Request) {
             parameters: z.object({
               topic: z.string().describe('The topic or question to research'),
             }),
-            execute: async ({ topic, maxDepth = 7 }) => {
+            execute: async ({ topic, maxDepth = 7 }: { topic: string; maxDepth?: number }) => {
               const startTime = Date.now();
               const timeLimit = 4.5 * 60 * 1000; // 4 minutes 30 seconds in milliseconds
 
@@ -490,7 +502,17 @@ export async function POST(request: Request) {
               });
 
               // Internal function to generate text (with a unique name to avoid conflicts)
-              async function generateTextInternal({ model, prompt, system, maxTokens = 1024 }) {
+              async function generateTextInternal({ 
+                model, 
+                prompt, 
+                system, 
+                maxTokens = 1024 
+              }: { 
+                model: any; 
+                prompt: string; 
+                system?: string; 
+                maxTokens?: number 
+              }): Promise<{ text: string }> {
                 if (model.isDirectGroq) {
                   const messages = system 
                     ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
@@ -793,7 +815,7 @@ export async function POST(request: Request) {
             },
           },
         },
-        onFinish: async ({ response }) => {
+        onFinish: async ({ response }: { response: any }) => {
           if (session.user?.id) {
             try {
               const responseMessagesWithoutIncompleteToolCalls =
@@ -801,7 +823,7 @@ export async function POST(request: Request) {
 
               await saveMessages({
                 messages: responseMessagesWithoutIncompleteToolCalls.map(
-                  (message) => {
+                  (message: any) => {
                     const messageId = generateUUID();
 
                     if (message.role === 'assistant') {
