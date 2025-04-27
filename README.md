@@ -1,5 +1,3 @@
----
-
 # Medi Buddy – Hackathon Project
 
 ## Prerequisites
