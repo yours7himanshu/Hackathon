@@ -1,157 +1,128 @@
-# Open Deep Research
+---
 
-An open-source clone of OpenAI's Deep Research experiment. Instead of using a fine-tuned version of `o3`, this method leverages [Firecrawl's Extract + Search](https://firecrawl.dev/) alongside a reasoning model to conduct deep research on the web.
+# Medi Buddy – Hackathon Project
 
-Check out the [demo](https://x.com/nickscamara_/status/1886459999905521912).
+## Prerequisites
 
-![Open Deep Research Hero](public/open-deep-researched-pic.png)
+Before setting up the project, ensure the following are installed:
+
+- **PostgreSQL**  
+- **Node.js**  
+- **pnpm** (Package Manager)
 
 ---
 
-## 🚀 Features
+## Setup Instructions
 
-### 🔍 Firecrawl Search + Extract
-- **Real-time AI-driven research**: Fetch live data from the web via search.
-- **Structured data extraction**: Collect relevant information from multiple sources efficiently.
-
-### ⚡ Next.js App Router
-- **Optimized performance** with advanced routing.
-- **React Server Components (RSCs)** for improved server-side rendering and responsiveness.
-
-### 🤖 AI SDK (Vercel)
-- Unified API for generating text, structured objects, and tool calls with LLMs.
-- Hooks for dynamic chat and generative UI development.
-- Supports OpenAI (default), Anthropic, Cohere, and other providers.
-
-### 🎨 UI & Styling
-- **[shadcn/ui](https://ui.shadcn.com)** for a modern design system.
-- **[Tailwind CSS](https://tailwindcss.com)** for efficient styling.
-- **[Radix UI](https://radix-ui.com)** for accessible and flexible components.
-
-### 💾 Data Persistence
-- **[Vercel Postgres](https://vercel.com/storage/postgres)** for chat history and user data.
-- **[Vercel Blob](https://vercel.com/storage/blob)** for file storage.
-
-### 🔑 Authentication
-- **[NextAuth.js](https://github.com/nextauthjs/next-auth)** for secure and seamless authentication.
-
----
-
-## 🤝 Model Providers
-
-This project uses `gpt-4o` by default. However, with the [AI SDK](https://sdk.vercel.ai/docs), you can switch to various LLM providers:
-- **[OpenAI](https://openai.com)**
-- **[Anthropic](https://anthropic.com)**
-- **[Cohere](https://cohere.com/)**
-- **[OpenRouter](https://openrouter.ai/)**
-
-To use OpenRouter, set the `OPENROUTER_API_KEY` environment variable.
-
----
-
-## ⏳ Function Execution Time
-
-By default, functions timeout after **300 seconds (5 minutes)**. On Vercel's Hobby tier, reduce this to **60 seconds**:
-
-```bash
-MAX_DURATION=60
-```
-
-More details [here](https://vercel.com/docs/functions/configuring-functions/duration#duration-limits).
-
----
-
-## 🚀 Deploy Your Own Instance
-
-Deploy your own version with **one click**:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnickscamara%2Fopen-deep-research&env=AUTH_SECRET,OPENAI_API_KEY,OPENROUTER_API_KEY,FIRECRAWL_API_KEY,BLOB_READ_WRITE_TOKEN,POSTGRES_URL,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,REASONING_MODEL,BYPASS_JSON_VALIDATION,TOGETHER_API_KEY,MAX_DURATION&envDescription=Learn%20more%20about%20how%20to%20get%20the%20API%20Keys%20for%20the%20application&envLink=https%3A%2F%2Fgithub.com%2Fvercel%2Fai-chatbot%2Fblob%2Fmain%2F.env.example&demo-title=AI%20Chatbot&demo-description=An%20Open-Source%20AI%20Chatbot%20Template%20Built%20With%20Next.js%20and%20the%20AI%20SDK%20by%20Vercel.&demo-url=https%3A%2F%2Fchat.vercel.ai&stores=[{%22type%22:%22postgres%22},{%22type%22:%22blob%22}])
-
----
-
-## 🏗 Running Locally
-
-You'll need to configure environment variables. Use the provided [`.env.example`](.env.example) file as a reference.
-
-### ⚠️ Security Notice
-Do **not** commit your `.env` file, as it contains sensitive credentials.
-
-### Steps to run locally:
-
-1. **Install Vercel CLI**:
+1. **Clone the Repository**
    ```bash
-   npm i -g vercel
+   git clone https://github.com/yours7himanshu/Hackathon.git
+   cd Hackathon
    ```
-2. **Link to Vercel & GitHub**:
-   ```bash
-   vercel link
+
+2. **Create Environment Variables File**
+
+   Create a file named `.env.local` in the root of the project and add the following environment variables:
+
+   ```env
+   FIRECRAWL_API_KEY=****
+
+   GROQ_API_KEY=****
+
+   AUTH_SECRET=****
+
+   MAX_DURATION=60
+
+   BLOB_READ_WRITE_TOKEN=****
+
+   POSTGRES_URL=****
+
+   REASONING_MODEL='llama-3.3-70b-versatile'
+
+   BYPASS_JSON_VALIDATION=false
+
+   UPSTASH_REDIS_REST_URL=https://discrete-ray-26330.upstash.io
+
+   UPSTASH_REDIS_REST_TOKEN=****
+
+   BYPASS_JSON_VALIDATION=true
+
+   TOGETHER_API_KEY=****
+
+   NEXT_PUBLIC_NEWS_API_KEY=****
    ```
-3. **Download environment variables**:
-   ```bash
-   vercel env pull
-   ```
-4. **Install dependencies**:
+
+   > 🔔 **Note**: Replace all the `****` placeholders with your actual API keys and credentials.
+
+3. **Install Dependencies**
    ```bash
    pnpm install
    ```
-5. **Run database migrations**:
+
+4. **Migrate the Database**
    ```bash
    pnpm db:migrate
    ```
-6. **Start the application**:
+
+5. **Run the Development Server**
    ```bash
    pnpm dev
    ```
 
-Your app will now be running on **[localhost:3000](http://localhost:3000/)**.
+---
+
+## Team: **Super-AI-BROS**
+
+- **Tarandeep Singh**
+- **Himanshu Dinkar**
+- **Namit Jain**
+- **Prayag Parashar**
 
 ---
 
-## 🔗 Model Dependencies
+## Problem Statement:  
+**What Medi Buddy Solves**
 
-If using models beyond the default, install the required dependencies.
+Despite significant advances in AI and healthcare technology, there is still a lack of **domain-specific Large Language Models (LLMs)** for medical applications. Key issues include:
 
-For **TogetherAI's DeepSeek**:
-```bash
-pnpm add @ai-sdk/togetherai
-```
+- Inaccurate and unreliable responses to specialized medical queries
+- Lack of real-time updates based on the latest medical research and news
+- Inadequate tools to help researchers, doctors, and users analyze medical reports in depth
 
-ℹ️ Check rate limits: [TogetherAI Docs](https://docs.together.ai/docs/rate-limits).
+This gap **limits the effectiveness** of AI in healthcare and impacts the reliability of information available to professionals and the public.
 
 ---
 
-## 🧠 Reasoning Model Configuration
+## Our Solution:  
+**Medi Buddy – A Domain-Specific Medical Agent**
 
-This app supports specialized reasoning models for structured research and analysis. Configure via the `REASONING_MODEL` environment variable.
+We are building a specialized **medical LLM agent** that can:
 
-### ✅ Supported Models
+- **Accurately answer** a wide range of medical-related questions
+- **Provide real-time updates** on the latest medical research and news
+- **Assist in analyzing complex medical reports** for researchers, doctors, and regular users
 
-| Provider  | Models                    | Notes                                       |
-|-----------|---------------------------|---------------------------------------------|
-| OpenAI    | `gpt-4o`, `o1`, `o3-mini` | Native JSON schema support                  |
-| TogetherAI | `deepseek-ai/DeepSeek-R1` | Requires `BYPASS_JSON_VALIDATION=true`      |
+By combining state-of-the-art NLP techniques with **continuously updated medical knowledge**, our solution aims to:
 
-### ⚠️ Important Notes
+- Bridge the current gap
+- Improve the **accessibility, reliability, and impact** of AI in the healthcare sector
 
-- **Only OpenAI models (`gpt-4o`, `o1`, `o3-mini`)** natively support structured JSON outputs.
-- **For non-OpenAI models** (e.g., `DeepSeek-R1`), disable JSON validation:
-  ```bash
-  BYPASS_JSON_VALIDATION=true
-  ```
-- The reasoning model is used for:
-  - Research analysis
-  - Document structuring
-  - Data extraction
-  - Structured responses
-- Defaults to `o1-mini` if no model is specified.
+---
 
-### 🔧 Configuration Example
+## Challenges We Faced
 
-```bash
-REASONING_MODEL=google/gemini-2.5-pro-exp-03-25:free
-BYPASS_JSON_VALIDATION=true
-```
+### 1. Chat Feature Development
 
-The reasoning model is **automatically applied** when structured responses or analysis are required.
+While integrating the chat feature using **Groq** (initially planned with **OpenRouter**), we faced the following issues:
+
+- A **bug** caused the **Deep Research** feature to malfunction — it could no longer properly think and analyze scraped data.
+
+### 2. Changes Implemented
+
+- Temporarily **limited the scraping capabilities** to maintain system stability.
+- Despite the bug, we **cannot revert to OpenRouter** because:
+  - **Groq is approximately 100× faster** than OpenRouter.
+  
+We are actively working on a fix to **restore full functionality** while maintaining the performance benefits Groq offers.
 
 ---
