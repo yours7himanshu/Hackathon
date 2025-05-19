@@ -24,25 +24,25 @@
 
 @layer base {
     :root {
-        --background: 210 50% 98%;
-        --foreground: 220 20% 10%;
+        --background: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
         --card: 0 0% 100%;
-        --card-foreground: 220 20% 10%;
+        --card-foreground: 240 10% 3.9%;
         --popover: 0 0% 100%;
-        --popover-foreground: 220 20% 10%;
-        --primary: 215 100% 50%;
+        --popover-foreground: 240 10% 3.9%;
+        --primary: 240 5.9% 10%;
         --primary-foreground: 0 0% 98%;
-        --secondary: 215 30% 95%;
-        --secondary-foreground: 220 20% 10%;
-        --muted: 210 40% 97%;
-        --muted-foreground: 220 10% 40%;
-        --accent: 215 100% 96%;
-        --accent-foreground: 215 100% 30%;
+        --secondary: 240 4.8% 95.9%;
+        --secondary-foreground: 240 5.9% 10%;
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        --accent: 240 4.8% 95.9%;
+        --accent-foreground: 240 5.9% 10%;
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
-        --border: 215 20% 90%;
-        --input: 215 20% 90%;
-        --ring: 215 100% 50%;
+        --border: 240 5.9% 90%;
+        --input: 240 5.9% 90%;
+        --ring: 240 5.9% 10%;
         --chart-1: 215 70% 60%;
         --chart-2: 190 70% 50%;
         --chart-3: 240 60% 60%;
@@ -59,25 +59,25 @@
         --sidebar-ring: 215 100% 60%;
     }
     .dark {
-        --background: 225 30% 10%;
-        --foreground: 210 20% 98%;
-        --card: 225 25% 15%;
-        --card-foreground: 210 20% 98%;
-        --popover: 225 25% 15%;
-        --popover-foreground: 210 20% 98%;
-        --primary: 210 100% 65%;
-        --primary-foreground: 225 25% 15%;
-        --secondary: 225 20% 20%;
-        --secondary-foreground: 210 20% 98%;
-        --muted: 225 20% 20%;
-        --muted-foreground: 210 20% 80%;
-        --accent: 215 30% 30%;
-        --accent-foreground: 210 20% 98%;
-        --destructive: 0 70% 45%;
-        --destructive-foreground: 210 20% 98%;
-        --border: 225 20% 25%;
-        --input: 225 20% 25%;
-        --ring: 210 100% 65%;
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
         --chart-1: 210 80% 60%;
         --chart-2: 190 75% 55%;
         --chart-3: 230 70% 65%;
@@ -177,36 +177,113 @@
     @apply bg-blue-200 hover:bg-blue-300 dark:hover:bg-blue-400/50 dark:text-blue-50 dark:bg-blue-500/40;
 }
 
-/* Mobile optimizations */
-@media (max-width: 640px) {
-  html, body {
-    /* Prevent overscroll bounce effect on mobile */
+/* Mobile Optimizations */
+html, body {
     overscroll-behavior: none;
-  }
-  
-  /* Larger touch targets for mobile */
-  button, 
-  a[role="button"],
-  .clickable {
-    @apply min-h-10 min-w-10;
-  }
-  
-  /* Improve tap highlight for mobile */
-  .tap-highlight {
-    -webkit-tap-highlight-color: rgba(var(--primary), 0.2);
-  }
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* System improvements for sidebar on mobile */
-.sidebar-open {
-  @apply overflow-hidden lg:overflow-auto;
+/* Improve touch targets */
+button, 
+a, 
+input[type="button"], 
+input[type="submit"],
+input[type="reset"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem;
+    touch-action: manipulation;
 }
 
-/* Fix for iOS safari 100vh issue */
+/* Prevent zoom on input focus for iOS */
+input, 
+textarea, 
+select {
+    font-size: 16px;
+}
+
+/* Container padding for mobile */
+.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* Hide scrollbars but keep functionality */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Safe area insets for mobile */
+.h-safe-area-inset-bottom {
+    height: env(safe-area-inset-bottom, 0px);
+}
+
+/* Fix for iOS Safari 100vh issue */
+.h-dvh {
+    height: 100dvh;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+    
+    .text-mobile {
+        font-size: 0.875rem;
+    }
+    
+    .p-mobile {
+        padding: 0.75rem;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .hide-on-tablet {
+        display: none !important;
+    }
+    
+    .text-tablet {
+        font-size: 1rem;
+    }
+    
+    .p-tablet {
+        padding: 1rem;
+    }
+}
+
+/* Sidebar improvements for mobile */
+@media (max-width: 640px) {
+    .sidebar-mobile {
+        width: 85vw;
+        max-width: 400px;
+    }
+    
+    .sidebar-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+}
+
+/* Fix for iOS Safari viewport height */
 @supports (-webkit-touch-callout: none) {
-  .h-screen, .h-full.fixed {
-    height: -webkit-fill-available;
-  }
+    .h-screen {
+        height: -webkit-fill-available;
+    }
 }
 
 /* Button styling for Search and Deep Research buttons */
